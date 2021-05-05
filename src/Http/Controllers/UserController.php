@@ -23,6 +23,7 @@ class UserController extends Controller
     {
         return response()->json(
             User::query()
+                ->select('id', 'name', 'email', 'avatar', 'role')
                 ->latest()
                 ->withCount('posts')
                 ->paginate(), 200
@@ -36,7 +37,7 @@ class UserController extends Controller
      */
     public function create(): JsonResponse
     {
-        return response()->json(User::make([
+        return response()->json(User::query()->make([
             'id' => Uuid::uuid4()->toString(),
             'role' => User::CONTRIBUTOR,
         ]), 200);
@@ -70,7 +71,7 @@ class UserController extends Controller
             }
         }
 
-        if (! Arr::has($data, 'locale') || ! Arr::has(Canvas::availableLanguageCodes(), $data['locale'])) {
+        if (! Arr::has($data, 'locale') || ! in_array($data['locale'], Canvas::availableLanguageCodes())) {
             $data['locale'] = config('app.fallback_locale');
         }
 
@@ -107,7 +108,7 @@ class UserController extends Controller
      * @param $id
      * @return JsonResponse
      */
-    public function showPosts($id): JsonResponse
+    public function posts($id): JsonResponse
     {
         $user = User::query()->with('posts')->find($id);
 

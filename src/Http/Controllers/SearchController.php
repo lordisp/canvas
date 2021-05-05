@@ -17,17 +17,19 @@ class SearchController extends Controller
      *
      * @return JsonResponse
      */
-    public function showPosts(): JsonResponse
+    public function posts(): JsonResponse
     {
         $posts = Post::query()
+                     ->select('id', 'title')
                      ->when(request()->user('canvas')->isContributor, function (Builder $query) {
                          return $query->where('user_id', request()->user('canvas')->id);
                      }, function (Builder $query) {
                          return $query;
                      })
-                     ->select('id', 'title')
                      ->latest()
                      ->get();
+
+        // TODO: Can ->map() drop into the above query?
 
         $posts->map(function ($post) {
             $post['name'] = $post->title;
@@ -45,7 +47,7 @@ class SearchController extends Controller
      *
      * @return JsonResponse
      */
-    public function showTags(): JsonResponse
+    public function tags(): JsonResponse
     {
         $tags = Tag::query()
                    ->select('id', 'name')
@@ -67,7 +69,7 @@ class SearchController extends Controller
      *
      * @return JsonResponse
      */
-    public function showTopics(): JsonResponse
+    public function topics(): JsonResponse
     {
         $topics = Topic::query()
                        ->select('id', 'name')
@@ -89,7 +91,7 @@ class SearchController extends Controller
      *
      * @return JsonResponse
      */
-    public function showUsers(): JsonResponse
+    public function users(): JsonResponse
     {
         $users = User::query()
                      ->select('id', 'name', 'email')
